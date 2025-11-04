@@ -1,0 +1,6 @@
+Backend/Recipe_Chatbot/
+recipe-maker/node_modules/
+.env
+__pycache__/
+uploads/
+runs/
