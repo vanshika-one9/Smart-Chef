@@ -19,7 +19,7 @@ def predict_image(image_path):
 
     # Make predictions
    # results = model.predict(source=image_path, show=True, save=True)
-    results = model.predict(source=image_path, imgsz=640, show=False, save=False)
+    results = model.predict(source=image_path, show=False, save=False)
 
 
     # Extract detected ingredients and their counts
