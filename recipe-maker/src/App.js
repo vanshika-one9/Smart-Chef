@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+
+      
+      import React, { useState } from "react";
 import {
   Box,
   Typography,
@@ -7,7 +9,6 @@ import {
   TextField,
   IconButton,
   Paper,
-  Container,
 } from "@mui/material";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { dark } from "react-syntax-highlighter/dist/esm/styles/prism";
@@ -23,6 +24,9 @@ import Logo from "./2.png";
 import "./App.css";
 import UploadIcon from "@mui/icons-material/Upload";
 import { marked } from "marked";
+
+// ✅ Use environment variable for backend URL
+const API_BASE_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:8000";
 
 function App() {
   const [uploadedImage, setUploadedImage] = useState(null);
@@ -60,19 +64,19 @@ function App() {
     const imageUrl = URL.createObjectURL(file);
     setUploadedImage(imageUrl);
     uploadImage(file);
-    // Switch to chat tab on mobile after uploading
     if (window.innerWidth <= 768) {
       setActiveTab("chat");
     }
   };
 
+  // ✅ Upload image and detect ingredients
   const uploadImage = async (file) => {
     const formData = new FormData();
     formData.append("file", file);
 
     setLoading(true);
     try {
-      const response = await fetch("http://127.0.0.1:8000/upload", {
+      const response = await fetch(`${API_BASE_URL}/upload`, {
         method: "POST",
         body: formData,
       });
@@ -112,27 +116,28 @@ function App() {
     setModifiedIngredients(updatedIngredients);
   };
 
+  // ✅ Generate recipe using backend
   const handleGenerateRecipe = async () => {
     if (modifiedIngredients.length === 0) {
       addChatMessage(false, "No ingredients detected. Please upload an image first.");
       return;
     }
-  
+
     setLoading(true);
     try {
-      const response = await fetch("http://127.0.0.1:8000/recipe", {
+      const response = await fetch(`${API_BASE_URL}/recipe`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ingredients: modifiedIngredients }),
       });
-  
+
       const data = await response.json();
-      console.log("Recipe response data:", data); // Debugging log
-  
+      console.log("Recipe response data:", data);
+
       if (!data || !data.subsections || !Array.isArray(data.subsections)) {
         throw new Error("Invalid response format from the server.");
       }
-  
+
       const formattedContent = data.subsections
         .map((section) => {
           const contentList = Array.isArray(section.items)
@@ -140,15 +145,14 @@ function App() {
             : Array.isArray(section.steps)
             ? section.steps.map((step) => marked(step)).join("")
             : "";
-  
+
           return `<h5>${section.heading}</h5>${contentList}`;
         })
         .join("");
-  
+
       addChatMessage(false, `<h4>Generated Recipe:</h4>${formattedContent}`);
       setShowGenerateButton(false);
-      
-      // Switch to chat tab on mobile after generating recipe
+
       if (window.innerWidth <= 768) {
         setActiveTab("chat");
       }
@@ -159,7 +163,8 @@ function App() {
       setLoading(false);
     }
   };
-  
+
+  // ✅ Chatbot conversation
   const handleChatQuerySubmit = async () => {
     if (!userQuery.trim()) {
       return;
@@ -167,9 +172,9 @@ function App() {
 
     addChatMessage(true, userQuery);
     setLoading(true);
-    
+
     try {
-      const response = await fetch("http://127.0.0.1:8000/chatbot", {
+      const response = await fetch(`${API_BASE_URL}/chatbot`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ query: userQuery }),
@@ -195,23 +200,17 @@ function App() {
 
   const addChatMessage = (isUser, content) => {
     const isCode = content.startsWith("<code>");
-
     setChatHistory((prev) => [
       ...prev,
-      {
-        isUser,
-        content,
-        isHtml: !isCode,
-        isCode,
-      },
+      { isUser, content, isHtml: !isCode, isCode },
     ]);
   };
 
   return (
-    <div 
-      className={`App show-${activeTab}`} 
-      onDragOver={handleDragOver} 
-      onDragLeave={handleDragLeave} 
+    <div
+      className={`App show-${activeTab}`}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
       onDrop={handleDrop}
     >
       <Box className="chat-header">
@@ -223,17 +222,17 @@ function App() {
 
       {dragging && (
         <Box className="drag-overlay">
-          <Paper 
-            elevation={3} 
-            sx={{ 
-              padding: 4, 
-              backgroundColor: 'rgba(30, 41, 59, 0.9)', 
+          <Paper
+            elevation={3}
+            sx={{
+              padding: 4,
+              backgroundColor: "rgba(30, 41, 59, 0.9)",
               borderRadius: 2,
-              border: '2px dashed #3b82f6'
+              border: "2px dashed #3b82f6",
             }}
           >
-            <UploadIcon sx={{ fontSize: 60, color: '#3b82f6', mb: 2 }} />
-            <Typography variant="h5" sx={{ color: 'white' }}>
+            <UploadIcon sx={{ fontSize: 60, color: "#3b82f6", mb: 2 }} />
+            <Typography variant="h5" sx={{ color: "white" }}>
               Drop your image here!
             </Typography>
           </Paper>
@@ -242,7 +241,7 @@ function App() {
 
       <Box className="main-container">
         <Box className="chat-container">
-          <Box sx={{ flexGrow: 1, overflowY: 'auto', mb: 2 }}>
+          <Box sx={{ flexGrow: 1, overflowY: "auto", mb: 2 }}>
             {chatHistory.map((msg, index) => (
               <Box
                 key={index}
@@ -325,31 +324,28 @@ function App() {
                     label={`Ingredient ${index + 1}`}
                     margin="dense"
                     InputProps={{
-                      sx: { color: 'white' }
+                      sx: { color: "white" },
                     }}
                   />
-                  <IconButton
-                    onClick={() => handleRemoveIngredient(index)}
-                    size="small"
-                  >
+                  <IconButton onClick={() => handleRemoveIngredient(index)} size="small">
                     <DeleteIcon />
                   </IconButton>
                 </li>
               ))}
             </ul>
-            <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+            <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
               <Button
                 variant="outlined"
                 startIcon={<AddIcon />}
                 onClick={handleAddIngredient}
-                sx={{ 
-                  flex: 1, 
-                  borderColor: '#3b82f6', 
-                  color: '#3b82f6',
-                  '&:hover': {
-                    borderColor: '#2563eb',
-                    backgroundColor: 'rgba(59, 130, 246, 0.04)'
-                  }
+                sx={{
+                  flex: 1,
+                  borderColor: "#3b82f6",
+                  color: "#3b82f6",
+                  "&:hover": {
+                    borderColor: "#2563eb",
+                    backgroundColor: "rgba(59, 130, 246, 0.04)",
+                  },
                 }}
               >
                 Add
@@ -390,21 +386,18 @@ function App() {
           value={userQuery}
           onChange={(e) => setUserQuery(e.target.value)}
           onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              handleChatQuerySubmit();
-            }
+            if (e.key === "Enter") handleChatQuerySubmit();
           }}
           className="input-field"
           InputProps={{
-            sx: { 
-              color: 'white',
-              '&::placeholder': {
-                color: 'rgba(255, 255, 255, 0.7)'
-              }
-            }
+            sx: {
+              color: "white",
+              "&::placeholder": {
+                color: "rgba(255, 255, 255, 0.7)",
+              },
+            },
           }}
         />
-        
         <Button
           variant="contained"
           onClick={handleChatQuerySubmit}
@@ -416,26 +409,25 @@ function App() {
         </Button>
       </Box>
 
-      {/* Mobile Navigation */}
       <Box className="mobile-nav">
-        <Box 
-          className={`mobile-nav-button ${activeTab === 'chat' ? 'active' : ''}`}
-          onClick={() => setActiveTab('chat')}
+        <Box
+          className={`mobile-nav-button ${activeTab === "chat" ? "active" : ""}`}
+          onClick={() => setActiveTab("chat")}
         >
           <ChatIcon />
           <Typography variant="caption">Chat</Typography>
         </Box>
-        <Box 
-          className={`mobile-nav-button ${activeTab === 'image' ? 'active' : ''}`}
-          onClick={() => setActiveTab('image')}
+        <Box
+          className={`mobile-nav-button ${activeTab === "image" ? "active" : ""}`}
+          onClick={() => setActiveTab("image")}
         >
           <ImageIcon />
           <Typography variant="caption">Image</Typography>
         </Box>
         {ingredients.length > 0 && (
-          <Box 
-            className={`mobile-nav-button ${activeTab === 'ingredients' ? 'active' : ''}`}
-            onClick={() => setActiveTab('ingredients')}
+          <Box
+            className={`mobile-nav-button ${activeTab === "ingredients" ? "active" : ""}`}
+            onClick={() => setActiveTab("ingredients")}
           >
             <ListAltIcon />
             <Typography variant="caption">Ingredients</Typography>
