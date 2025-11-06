@@ -1,6 +1,4 @@
-
-      
-      import React, { useState } from "react";
+import React, { useState } from "react";
 import {
   Box,
   Typography,
@@ -26,7 +24,7 @@ import UploadIcon from "@mui/icons-material/Upload";
 import { marked } from "marked";
 
 // ✅ Use environment variable for backend URL
-const API_BASE_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:8000";
+const API_BASE_URL = process.env.REACT_APP_BACKEND_URL || "http://127.0.0.1:8000";
 
 function App() {
   const [uploadedImage, setUploadedImage] = useState(null);
