@@ -4,8 +4,9 @@ This repository contains a **Recipe Chatbot** that allows users to upload images
 
 ---
 
-## **🎥 Demo**
-![Recipe Chatbot Demo](Output/Recipe%20Chatbot.gif)
+## **Screenshot**
+<img width="1501" height="722" alt="image" src="https://github.com/user-attachments/assets/177da831-c370-4287-b3ad-c11e54a12f1e" />
+
 
 ---
 
