@@ -18,7 +18,9 @@ def predict_image(image_path):
         return
 
     # Make predictions
-    results = model.predict(source=image_path, show=True, save=True)
+   # results = model.predict(source=image_path, show=True, save=True)
+    results = model.predict(source=image_path, imgsz=640, show=False, save=False)
+
 
     # Extract detected ingredients and their counts
     detections = results[0].boxes.data.cpu().numpy()  # Extract bounding box data
